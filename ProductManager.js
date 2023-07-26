@@ -210,15 +210,30 @@ app.get('/products', async (req,resp)=>{
     if((limit==undefined || isNaN(limit) || limit>productos.length )){
         resp.send(await producto.getProducts())
     }else{
-        async function arrayFiltrado(){
-            let nuevaListaProd = []
-            for(let i=0;i<limit;i++){
-                producto.getProducts().then(resp=>nuevaListaProd.push(resp[i]))
-            }
-            return nuevaListaProd
-        }
-        resp.send(await arrayFiltrado())
+        
+        let newProductos=productos.map(elemento=>elemento)
+        newProductos.splice(limit-1,productos.length-limit)
+        resp.send(newProductos)
     }  
+})
+app.get('/products/:pid', async (req,resp)=>{
+    let pid=req.params.pid
+
+    if((pid==undefined || isNaN(pid) )){
+        resp.send(await producto.getProducts())
+    }else{
+        let respuesta=await producto.getProductById(pid)
+        console.log(respuesta);
+        if(respuesta==false){
+            resp.send("no existe el id")
+        }else{
+            resp.send(await producto.getProductById(pid))
+        }
+            
+    }  
+
+
+
 })
 
 app.listen(puerto,async ()=>{
