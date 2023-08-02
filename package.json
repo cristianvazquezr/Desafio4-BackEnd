@@ -1,5 +1,6 @@
 {
-  "name": "desafio-3ro",
+  "type":"module",
+  "name": "primer-entrega",
   "version": "1.0.0",
   "description": "",
   "main": "ProductManager.js",

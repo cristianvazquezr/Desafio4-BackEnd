@@ -1,6 +1,4 @@
-const { Console, log } = require('console')
-const fs=require('fs')
-
+import fs from 'fs'
 
 
 class ProductManager{
@@ -23,13 +21,13 @@ class ProductManager{
     }
 
 
-    async addProduct(title, description, price, thumbnail, code, stock){
+    async addProduct(title, description, category, price, thumbnail, code, stock){
         //incremento en 1 el valor de ID
         let  id= this.getProducts().then(resultado=>resultado.length)==undefined? 1:this.getProducts().then(resultado=>resultado.length+1);
         //creo un objeto nuevo con atributos nuevos
-        let producto1= {id:await id, title:title,description:description,price:price,thumbnail:thumbnail,code:code,stock:stock}
-        //creo un array con los valores de ese nuevo objeto
-        let valores=  Object.values(producto1)
+        let producto1= {id:await id, title:title,description:description,price:price,thumbnail:thumbnail,code:code,stock:stock, category:category, status:true}
+        //creo un array con los valores de ese nuevo objeto, excepto thumbnail por que puede estar vacio
+        let valores =[producto1.title,producto1.description,producto1.price,producto1.code,producto1.stock,producto1.category,producto1.status]
         //corroboro que no haya ningun valor vacio dentro de ese array
         let elementoVacio= valores.includes("")
         //corroboro que no haya ningun valor undefined dentro de ese array
@@ -42,7 +40,7 @@ class ProductManager{
                 listaProducto = JSON.parse(await fs.promises.readFile(this.path, 'utf-8'))
             }
             catch(err){
-                console.log("No existe el archivo2, sera creado")
+                console.log("No existe el archivo, sera creado")
             }
             return listaProducto
         }
@@ -52,13 +50,16 @@ class ProductManager{
         let mismoCode=ListaCode.then(resultado=>resultado.includes(producto1.code))
         if (elementoVacio || elementoUnd){
             console.log("existen atributos sin un valor definido")
+            return "valorVacio"
         }
         else if (await mismoCode){
             console.log("El valor elegido para code ya existe, elija otro")
+            return "codeRepetido"
         }
         else{
             const listaProductos= await listaProduct()
             await fs.promises.writeFile(this.path,JSON.stringify([...listaProductos, producto1]))
+            return true
         }
 
     }
@@ -78,7 +79,7 @@ class ProductManager{
         }
     }
 
-    async updateProduct(id,title, description, price, thumbnail, code, stock){
+    async updateProduct(id,title, description, category, price, thumbnail, code, stock){
         //chequeo que exista el archivo y que lo busque por id
         
         let Product=await this.getProductById(id)
@@ -87,9 +88,9 @@ class ProductManager{
         if (await Product!=false){
 
             //hago todas las validaciones de que no repita el CODE y que se hayan elegido valores para todos los atributos.
-            let producto1={id:id, title:title,description:description,price:price,thumbnail:thumbnail,code:code,stock:stock}
+            let producto1={id:id, title:title,description:description,price:price,thumbnail:thumbnail,code:code,stock:stock, category:category, status:true}
             //creo un array con los valores de ese nuevo objeto
-            let valores=Object.values(producto1)
+            let valores=[producto1.title,producto1.description,producto1.price,producto1.code,producto1.stock,producto1.category,producto1.status]
             //corroboro que no haya ningun valor vacio dentro de ese array
             let elementoVacio=valores.includes("")
             //corroboro que no haya ningun valor undefined dentro de ese array
@@ -119,9 +120,11 @@ class ProductManager{
 
             if (elementoVacio || elementoUnd){
                 console.log("existen atributos sin un valor definido")
+                return "valorVacio"
             }
             else if (await mismoCode){
                 console.log("El valor elegido para code ya existe, elija otro")
+                return "codeRepetido"
             }
             else{
 
@@ -139,9 +142,8 @@ class ProductManager{
 
         }else{
             console.log("no se encontro el elemento")
+            return "idInvalido"
         }
-
-    
 
 
 
@@ -164,78 +166,30 @@ class ProductManager{
             }
         }
         fs.promises.writeFile(this.path,JSON.stringify(listaModificada))
+        return true
     }else{
         console.log("no se encontro el elemento")
+        return false
     }}
 
 }
 
 
-let producto = new ProductManager("./productos.txt")
+// let producto = new ProductManager("./productos.json")
+
+// const lista=producto.getProducts()
+
+// console.log(await lista)
 
 //creo los productos
 
-async function crear(){
-    await producto.addProduct("Coca Cola","gaseosas",100,"imagen.com",1,100)
-    await producto.addProduct("Pepsi","gaseosas",80,"imagen.com",2,100)
-    await producto.addProduct("Sprite","gaseosas",95,"imagen.com",3,100)
-    await producto.addProduct("sevenUP","gaseosas",90,"imagen.com",4,100)
-    await producto.addProduct("pritty","gaseosas",60,"imagen.com",5,100)
-}
-crear()
+// async function crear(){
+//     await producto.addProduct("Coca Cola","gaseosas",100,"imagen.com",1,100)
+//     await producto.addProduct("Pepsi","gaseosas",80,"imagen.com",2,100)
+//     await producto.addProduct("Sprite","gaseosas",95,"imagen.com",3,100)
+//     await producto.addProduct("sevenUP","gaseosas",90,"imagen.com",4,100)
+//     await producto.addProduct("pritty","gaseosas",60,"imagen.com",5,100)
+// }
+// crear()
 
-
-//Creo el servidor
-
-const puerto=8080
-// const http = require('http')
-// const server=http.createServer((request,response)=>{
-//     response.end('hola mundo')
-// })
-// server.listen(puerto,()=>{
-//     console.log(`servidor conectado al puerto ${puerto}`)
-// })
-
-const express = require('express')
-app=express()
-
-app.use(express.urlencoded({extended:true}))
-
-app.get('/products', async (req,resp)=>{
-    let limit=req.query.limit
-    //con un condicional veo si existe query y que sea numero.
-
-    let productos=await producto.getProducts()
-   
-    if((limit==undefined || isNaN(limit) || limit>productos.length )){
-        resp.send(await producto.getProducts())
-    }else{
-        
-        let newProductos=productos.map(elemento=>elemento)
-        newProductos.splice(limit-1,productos.length-limit)
-        resp.send(newProductos)
-    }  
-})
-app.get('/products/:pid', async (req,resp)=>{
-    let pid=req.params.pid
-
-    if((pid==undefined || isNaN(pid) )){
-        resp.send(await producto.getProducts())
-    }else{
-        let respuesta=await producto.getProductById(pid)
-        console.log(respuesta);
-        if(respuesta==false){
-            resp.send("no existe el id")
-        }else{
-            resp.send(await producto.getProductById(pid))
-        }
-            
-    }  
-
-
-
-})
-
-app.listen(puerto,async ()=>{
-    console.log(`servidor conectado al puerto ${puerto}`)
-})
+export default ProductManager
