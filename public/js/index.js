@@ -7,7 +7,7 @@ const handleClick=()=>{
 socket.on("productos",data=>{
     console.log(data)
     const contenedorTabla=document.getElementById("contenedorTabla")
-    const tabla = data.forEach(element => {
+    data.forEach(element => {contenedorTabla.innerHTML+=
     `
     <tr key=${element.id}>
         <td>${element.id}</td>
@@ -21,9 +21,6 @@ socket.on("productos",data=>{
         <td>${element.status}</td>
         <td><input type="submit" id="boton" class="${element.id}" value="🗑️"></input></td>
     </tr>
-    `  
+    `
     });
-    console.log(tabla)
-
-    contenedorTabla.innerHTML=contenedorTabla.innerHTML + tabla
 })
