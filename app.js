@@ -27,23 +27,34 @@ app.set("view engine","handlebars")
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
 
-app.use("/",viewsRouter)
+app.use("/", viewsRouter)
 app.use("/", productRouter)
 app.use("/", cartRouter)
 
 
 // instancio la clase para poder enviar a todos los clientes los productos
-const PM = new ProductManager("./productos.json")
-let productos= await PM.getProducts()
 
-socketServer.on('connection',socket=>{
+
+socketServer.on('connection',async socket=>{
+    let PM = new ProductManager("./productos.json")
+    let productos= await PM.getProducts()
     console.log("nueva conexion realizada")
-
     socketServer.emit("productos",productos)
 
-    // socket.on("actualizo",data=>{
-    //     console.log(data)
-    //     socketServer.emit("productos",{productos:productos})
-    // })
+    socket.on("agregarProducto", async(product)=>{
+        let PM = new ProductManager("./productos.json")
+        await PM.addProduct(product.title, product.description, product.category, product.price, product.thumbnail, product.code, product.stock);
+        let productos= await PM.getProducts()
+        socketServer.emit("productos",productos);    
+    });
+    
+    socket.on("eliminarProducto",async(id)=>{
+        let PM = new ProductManager("./productos.json")
+        await PM.deleteProduct(id)
+        let PmNEW = new ProductManager("./productos.json")
+        let productos=await PmNEW.getProducts()
+        socketServer.emit("productos",productos); 
+    })
 
-})
+});
+    

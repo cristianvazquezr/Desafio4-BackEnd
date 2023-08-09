@@ -152,7 +152,6 @@ class ProductManager{
         //chequeo que exista el archivo y que lo busque por id
     
     let Product=await this.getProductById(id)
-    console.log(await Product)
     
     //valido que exista el id
     if (await Product!=false){
