@@ -1,10 +1,10 @@
 
 import  express  from 'express'
 import handlebars from 'express-handlebars'
-import productRouter from './src/Routes/products.router.js'
-import cartRouter from './src/Routes/cart.router.js'
+import productRouter from './Routes/products.router.js'
+import cartRouter from './Routes/cart.router.js'
 import __dirname from './utils.js'
-import viewsRouter from './src/Routes/views.router.js' 
+import viewsRouter from './Routes/views.router.js' 
 import {Server} from 'socket.io'
 import ProductManager from './ProductManager.js'
 
@@ -53,7 +53,7 @@ socketServer.on('connection',async socket=>{
         await PM.deleteProduct(id)
         let PmNEW = new ProductManager("./productos.json")
         let productos=await PmNEW.getProducts()
-        socketServer.emit("productos",productos); 
+        await socketServer.emit("productos",productos); 
     })
 
 });

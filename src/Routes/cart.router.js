@@ -1,5 +1,5 @@
 import { Router } from "express"
-import cartManager from "../../cartManager.js"
+import cartManager from "../cartManager.js"
 
 //isntancio la clase cartManager
 

@@ -53,16 +53,5 @@
         "stock": 100,
         "category": "gaseosa carbonatada",
         "status": true
-    },
-    {
-        "id": 6,
-        "title": "fanta naranja",
-        "description": "bebida sabor naranja",
-        "price": 100,
-        "thumbnail": "imagen.com",
-        "code": 7,
-        "stock": 100,
-        "category": "gaseosa carbonatada",
-        "status": true
     }
 ]
