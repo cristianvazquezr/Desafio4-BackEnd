@@ -40,16 +40,8 @@ const CM = new cartManager()
 
 const viewsRouter=Router()
 
-viewsRouter.get('/',auth, async (req,resp)=>{
-
-    let userLogged=req.user.first_name
-    
-
-    let productos=await PM.getProducts(req.query)
-
+viewsRouter.get('/', async (req,resp)=>{
     resp.render("home",{
-        product:productos.payLoad,
-        user:userLogged,
         style:"style.css"
         
     })
@@ -128,6 +120,8 @@ viewsRouter.get('/restore',async (req,resp)=>{
         style:"../../css/style.css"
     })
 })
+
+
 
 // viewsRouter.get('*', async(req, res)=>{
 //     res.render("error",{

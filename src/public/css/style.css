@@ -82,7 +82,7 @@
 
 .contenedorPrincipal{
     background-color: #c1c1c11a;
-    margin-bottom: 80px;
+    
 }
 
 .itemsNavBar{
@@ -157,3 +157,29 @@
     display: flex;
     flex-direction: row;
 }
+
+.slogan{
+    background-repeat: no-repeat;
+    background-position: right;
+    height: 100%;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("/../../images/Logo.png");
+    display: flex;
+    flex-direction: column;
+}
+.subSlogan{
+    text-align: center;
+}
+
+.contenedorSlogan{
+    height: 100vh;
+}
+
+.ocultarComponente{
+    display: none;
+    visibility: hidden;
+}
+
+.colorFondo{
+    background-color: #ffffff;
+}
+
