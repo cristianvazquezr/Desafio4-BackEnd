@@ -1,3 +1,4 @@
+import { json } from 'express';
 import { productModel  } from './models/product.model.js'
 
 
@@ -9,16 +10,49 @@ class ProductManager{
 
     async getProducts(params){
         let {limit, page, query, sort}=params
-
         limit = limit ? limit : 10;
         page = page ? page : 1;
-        query = query ? query : '';
+        // para poder convertir en un objeto el query lo que hago es generar un array del par clave valor y luego lo convierto con la propiedad de OBject. uso una expresion regular en el replace para que le elimine todas las comillas de coca cola
+        let clave=query ? query.split(":")[0] : "";
+        let valor= query ? (query.split(":")[1]).replace(/(")/gm,'') : "";
+        let arrayQuery= [clave, valor]
+        let ObjQuery=Object.fromEntries([arrayQuery]);
+        query = query ? ObjQuery : {};
         sort = sort ? sort == 'asc' ? 1 : -1 : 0;
-
- 
         let listaProducto=[]
+        let filtro={}
+
+
+        if (sort==0){
+            filtro={limit:limit,page:page}
+        }else{
+            
+            filtro={limit:limit,page:page, sort:{price:sort}}
+        }
+        
+
         try{
-            listaProducto = await productModel.find().lean()
+            listaProducto = await productModel.paginate(query,filtro)
+            let status = listaProducto ? "success" : "error";
+            let hasPrevPage=listaProducto.hasPrevPage
+            let hasNextPage=listaProducto.hasNextPage
+            let prevPage=listaProducto.prevPage
+            let nextPage=listaProducto.nextPage
+            let prevLink= hasPrevPage!=false ? 'http://localhost:8080/products/?limit=' + limit + "&page=" + prevPage : null;
+            let nextLink= hasNextPage!=false ? 'http://localhost:8080/products/?limit=' + limit + "&page=" + nextPage : null;
+
+            listaProducto={
+                status:status, 
+                payLoad:listaProducto.docs, 
+                totalPages:listaProducto.totalPages, 
+                prevPage:prevPage, 
+                nextPage:nextPage,
+                page:listaProducto.page,
+                hasPrevPage:hasPrevPage, 
+                hasNextPage:hasNextPage,
+                prevLink:prevLink,
+                nextLink:nextLink
+            }
         }
         catch(err){
             console.log("fallo la consulta" + err )
@@ -44,7 +78,7 @@ class ProductManager{
                 listaProducto = await productModel.find().lean()
             }
             catch(err){
-                console.log("fallo la consulta o no existe la coleccion")
+                console.log("fallo la consulta o no existe la coleccion " + err)
             }
             return listaProducto
         }
@@ -99,14 +133,13 @@ class ProductManager{
             //corroboro que no haya ningun valor undefined dentro de ese array
             let elementoUnd=valores.includes(undefined)
 
-            //valido si existe el archivo sino indico que sera creado.
             const listaProduct = async ()=>{
                 let listaProducto=[]
                 try{
                     listaProducto = await productModel.find().lean()
                 }
                 catch(err){
-                    console.log("No existe el archivo, sera creado")
+                    console.log("Error al consultar los productos" + err)
                 }
                 return listaProducto
             }
@@ -114,7 +147,7 @@ class ProductManager{
             // con map genero un array de los code y veo si existe el mismo valor de code pero descarto el producto que tiene el mismo id
             let ListaCode=listaProduct().then(resultado=>resultado.map((elemento)=>{
                 let lista=''
-                if(id!=elemento.id){
+                if(id!=elemento._id){
                     lista=elemento.code
                 }
                 return lista
@@ -158,22 +191,5 @@ class ProductManager{
 
 }
 
-
-// let producto = new ProductManager("./productos.json")
-
-// const lista=producto.getProducts()
-
-// console.log(await lista)
-
-//creo los productos
-
-// async function crear(){
-//     await producto.addProduct("Coca Cola","gaseosas",100,"imagen.com",1,100)
-//     await producto.addProduct("Pepsi","gaseosas",80,"imagen.com",2,100)
-//     await producto.addProduct("Sprite","gaseosas",95,"imagen.com",3,100)
-//     await producto.addProduct("sevenUP","gaseosas",90,"imagen.com",4,100)
-//     await producto.addProduct("pritty","gaseosas",60,"imagen.com",5,100)
-// }
-// crear()
 
 export default ProductManager

@@ -9,19 +9,11 @@ const PM = new ProductManager()
 const productRouter=Router()
 
 productRouter.get('/products', async (req,resp)=>{
-    let limit=req.query.limit
-    //con un condicional veo si existe query y que sea numero.
+    let productos=await PM.getProducts(req.query)
+    
 
-    let productos=await PM.getProducts()
+    resp.send(productos)
    
-    if((limit==undefined || isNaN(limit) || limit>productos.length )){
-        resp.send(await PM.getProducts())
-    }else{
-        
-        let newProductos=productos.map(elemento=>elemento)
-        newProductos.splice(limit-1,productos.length-limit)
-        resp.send(newProductos)
-    } 
 })
 productRouter.get('/products/:pid', async (req,resp)=>{
     let pid=req.params.pid

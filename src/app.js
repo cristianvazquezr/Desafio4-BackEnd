@@ -1,7 +1,8 @@
-
 import  express  from 'express'
-import handlebars from 'express-handlebars'
+import expressHandlebars from 'express-handlebars'
+import Handlebars from 'handlebars'
 import productRouter from './Routes/products.router.js'
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access'
 import cartRouter from './Routes/cart.router.js'
 import __dirname from './utils.js'
 import viewsRouter from './Routes/views.router.js' 
@@ -10,7 +11,12 @@ import ProductManager from './dao/ProductManager.js'
 import mongoose from 'mongoose'
 import messageMananger from './dao/messageManager.js'
 import messageRouter from './Routes/message.router.js'
-
+import cookieParser from 'cookie-parser'
+import sessionRouter from './Routes/session.router.js'
+import session from 'express-session'
+import MongoStore from 'connect-mongo';
+import passport from 'passport';
+import initiliazePassport from './config/passport.config.js'
 
 //Creo el servidor
 
@@ -26,16 +32,35 @@ const socketServer = new Server(httpServer)
 mongoose.connect('mongodb+srv://vazquezcristianr:Cristian123@clustercristian.ggp7vhd.mongodb.net/ecommerce?retryWrites=true&w=majority') 
 
 app.use(express.static(__dirname + "/public"))
-app.engine("handlebars",handlebars.engine())
+app.engine("handlebars",expressHandlebars.engine({
+    handlebars: allowInsecurePrototypeAccess(Handlebars)
+}))
 app.set("views",__dirname+"/views" )
 app.set("view engine","handlebars")
 app.use(express.urlencoded({extended:true}))
 app.use(express.json())
+app.use(session({
+    store:MongoStore.create({
+        mongoUrl:"mongodb+srv://vazquezcristianr:Cristian123@clustercristian.ggp7vhd.mongodb.net/ecommerce?retryWrites=true&w=majority",
+        mongoOptions:{useNewUrlParser:true,useUnifiedTopology:true},
+        ttl:15000,
+    }),
+    secret:"cr1st14n",
+    resave:false,
+    saveUninitialized:false
+}))
+app.use(cookieParser())
+initiliazePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/", viewsRouter)
-app.use("/", productRouter)
-app.use("/", cartRouter)
+app.use("/api", productRouter)
+app.use("/api", cartRouter)
+app.use("/api", sessionRouter)
 app.use("/", messageRouter)
+
+
 
 
 // instancio la clase para poder enviar a todos los clientes los productos
@@ -43,7 +68,7 @@ app.use("/", messageRouter)
 
 socketServer.on('connection',async socket=>{
     let PM = new ProductManager()
-    let productos= await PM.getProducts()
+    let productos= await PM.getProducts({limit:'', page:'', query:'', sort:''})
     let MM = new messageMananger()
     let mensajes = await MM.getMessage()
     console.log("nueva conexion realizada")
@@ -53,7 +78,7 @@ socketServer.on('connection',async socket=>{
     socket.on("agregarProducto", async(product)=>{
         let PM = new ProductManager()
         await PM.addProduct(product.title, product.description, product.category, product.price, product.thumbnail, product.code, product.stock);
-        let productos= await PM.getProducts()
+        let productos= await PM.getProducts({limit:'', page:'', query:'', sort:''})
         socketServer.emit("productos",productos);    
     });
     
@@ -61,7 +86,7 @@ socketServer.on('connection',async socket=>{
         let PM = new ProductManager()
         await PM.deleteProduct(id)
         let PmNEW = new ProductManager()
-        let productos=await PmNEW.getProducts()
+        let productos=await PmNEW.getProducts({limit:'', page:'', query:'', sort:''})
         socketServer.emit("productos",productos); 
     })
     socket.on("newMessage",async(message)=>{
