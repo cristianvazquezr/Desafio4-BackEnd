@@ -52,7 +52,7 @@ function DeleteProduct(idElementoEliminar){
 socket.on("productos",data=>{
     const contenedorTabla=document.getElementById("contenedorTabla")
     let contendor=''
-    data.forEach(element => {contendor+=
+    data.payLoad.forEach(element => {contendor+=
     `
     <tr key=${element._id}>
         <td>${element._id}</td>
@@ -71,3 +71,24 @@ socket.on("productos",data=>{
     contenedorTabla.innerHTML=contendor
     botonEliminar()
 })
+
+//logout
+
+async function logout(){
+
+    try{
+        let logout=await fetch(`/api/session/logout`, {
+        method:'get',
+        })
+        console.log("Sesion eliminada")
+        sessionStorage.removeItem("carrito")
+        location.href="http://localhost:8080/login"
+        
+    }catch(err){
+        console.log("fallo " + err)
+    }
+
+}
+
+let logoutElement = document.getElementById("logout")
+logoutElement.onclick=logout

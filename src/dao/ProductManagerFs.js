@@ -1,7 +1,7 @@
 import fs from 'fs'
 
 
-class ProductManager{
+class ProductManagerFs{
 
     constructor(path){
         this.path=path
@@ -191,4 +191,4 @@ class ProductManager{
 // }
 // crear()
 
-export default ProductManager
+export default ProductManagerFs

@@ -1,5 +1,5 @@
 import { Router } from "express"
-import ProductManager from '../ProductManager.js'
+import ProductManager from '../dao/ProductManager.js'
 
 
 //instancio la clase Productmanager
@@ -13,6 +13,8 @@ viewsRouter.get('/', async (req,resp)=>{
     //con un condicional veo si existe query y que sea numero.
 
     let productos=await PM.getProducts()
+
+    console.log(productos)
    
     if((limit==undefined || isNaN(limit) || limit>productos.length )){
         const listProduct = await PM.getProducts()
@@ -34,6 +36,12 @@ viewsRouter.get('/', async (req,resp)=>{
 
 viewsRouter.get('/realtimeproducts', async (req,resp)=>{
     resp.render("realTimeProducts",{
+        style:"style.css"
+    })
+})
+
+viewsRouter.get('/chat', async (req,resp)=>{
+    resp.render("chat",{
         style:"style.css"
     })
 })

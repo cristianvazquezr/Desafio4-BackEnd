@@ -1,10 +1,10 @@
 import { Router } from "express"
-import ProductManager from '../ProductManager.js'
+import ProductManager from '../dao/ProductManager.js'
 
 
 //instancio la clase Productmanager
 
-const PM = new ProductManager("./productos.json")
+const PM = new ProductManager()
 
 const productRouter=Router()
 
@@ -26,11 +26,10 @@ productRouter.get('/products', async (req,resp)=>{
 productRouter.get('/products/:pid', async (req,resp)=>{
     let pid=req.params.pid
 
-    if((pid==undefined || isNaN(pid) )){
+    if((pid==undefined)){
         resp.send(await PM.getProducts())
     }else{
         let respuesta=await PM.getProductById(pid)
-        console.log(respuesta);
         if(respuesta==false){
             resp.send("no existe el id")
         }else{

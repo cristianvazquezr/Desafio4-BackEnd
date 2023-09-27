@@ -8,6 +8,15 @@
     margin-bottom: 6vh;
 }
 
+.tituloChat{
+    padding: 0.5vh;
+    font-size: 300%;
+    font-weight: 400;
+    font-family: 'Times New Roman', Times, serif;
+    color: #687D77;
+    width: 100%;
+}
+
 .ajustes{
     display: flex;
     flex-direction: column;
@@ -50,4 +59,17 @@
 }
 .tituloLegend{
     text-align: center;
+}
+
+
+.contenedorTotal{
+    width: 30vw;
+    border-style:solid;
+    border-color: #687D77;
+    padding: 2vw;
+    margin-top: 5vh;
+}
+.nav-link{
+    font-size: 150%;
+    border-color: #687D77;
 }
